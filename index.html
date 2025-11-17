@@ -1,83 +1,468 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الموقع على الخريطة</title>
+    <title>موقعك على الخريطة - سحب iPhone 17</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            direction: rtl;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .map-container {
+            flex: 2;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        
         #map {
-            height: 100vh;
+            height: 500px;
             width: 100%;
         }
+        
         .info-panel {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: white;
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .info-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #ffd700;
+            text-align: center;
+        }
+        
+        .user-info {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-label {
+            font-weight: 500;
+        }
+        
+        .info-value {
+            color: #ffd700;
+        }
+        
+        .coordinates {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .coordinates h3 {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .coordinate-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .btn {
             padding: 15px;
+            border: none;
             border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-            z-index: 1000;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .success-message {
+            text-align: center;
+            padding: 15px;
+            background: rgba(0, 200, 0, 0.2);
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            #map {
+                height: 400px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="info-panel">
-        <h3>موقعك على الخريطة</h3>
-        <div id="coordinates"></div>
-        <a href="index.html">العودة للصفحة الرئيسية</a>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-map-marked-alt"></i> موقعك على الخريطة</h1>
+            <p class="subtitle">تم تحديد موقعك بنجاح! يمكنك رؤية موقعك على الخريطة أدناه</p>
+        </header>
+        
+        <div class="content">
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+            
+            <div class="info-panel">
+                <h2 class="info-title">معلومات المشاركة</h2>
+                
+                <div class="user-info">
+                    <h3><i class="fas fa-user-circle"></i> بيانات المسجل</h3>
+                    <div class="info-item">
+                        <span class="info-label">الاسم:</span>
+                        <span class="info-value" id="userName">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">البريد الإلكتروني:</span>
+                        <span class="info-value" id="userEmail">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">رقم الهاتف:</span>
+                        <span class="info-value" id="userPhone">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">الدولة:</span>
+                        <span class="info-value" id="userCountry">-</span>
+                    </div>
+                </div>
+                
+                <div class="coordinates">
+                    <h3><i class="fas fa-location-arrow"></i> الإحداثيات</h3>
+                    <div class="coordinate-item">
+                        <span>خط العرض:</span>
+                        <span id="latitude">-</span>
+                    </div>
+                    <div class="coordinate-item">
+                        <span>خط الطول:</span>
+                        <span id="longitude">-</span>
+                    </div>
+                    <div class="coordinate-item">
+                        <span>الدقة:</span>
+                        <span id="accuracy">-</span>
+                    </div>
+                    <div class="coordinate-item">
+                        <span>الوقت:</span>
+                        <span id="locationTime">-</span>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <a href="index.html" class="btn btn-primary">
+                        <i class="fas fa-arrow-right"></i> العودة إلى صفحة السحب
+                    </a>
+                    <button class="btn btn-secondary" id="refreshLocation">
+                        <i class="fas fa-sync-alt"></i> تحديث الموقع
+                    </button>
+                </div>
+                
+                <div class="success-message">
+                    <p><i class="fas fa-check-circle"></i> تم تسجيل مشاركتك في السحب بنجاح!</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>سيتم الإعلان عن الفائز في 5 يناير 2025 | شكراً لمشاركتك!</p>
+        </footer>
     </div>
-    <div id="map"></div>
 
     <!-- خرائط جوجل API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5cT2Gk5NRR2pZ1Ws6Q9Z-_J8L1CkQd0g&callback=initMap&libraries=geometry" async defer></script>
     
     <script>
+        let map;
+        let marker;
+        let circle;
+        
         function initMap() {
-            // جلب الإحداثيات من localStorage
-            const lat = parseFloat(localStorage.getItem('userLat'));
-            const lng = parseFloat(localStorage.getItem('userLng'));
+            // جلب بيانات المستخدم من localStorage
+            const userData = JSON.parse(localStorage.getItem('giveawayRegistration') || '{}');
+            const locationData = JSON.parse(localStorage.getItem('userLocation') || '{}');
             
-            // عرض الإحداثيات
-            document.getElementById('coordinates').innerHTML = `
-                <p>خط العرض: ${lat}</p>
-                <p>خط الطول: ${lng}</p>
-            `;
-
-            // إنشاء الخريطة
-            const map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 15,
-                center: { lat: lat, lng: lng },
-                mapTypeId: google.maps.MapTypeId.ROADMAP
-            });
-
-            // إضافة علامة للموقع
-            const marker = new google.maps.Marker({
-                position: { lat: lat, lng: lng },
-                map: map,
-                title: 'موقعك الحالي',
-                animation: google.maps.Animation.DROP
-            });
-
-            // إضافة نافذة معلومات
-            const infoWindow = new google.maps.InfoWindow({
-                content: `
-                    <div style="text-align: center;">
-                        <h3>موقعك الحالي</h3>
-                        <p>الإحداثيات: ${lat}, ${lng}</p>
+            // عرض بيانات المستخدم
+            document.getElementById('userName').textContent = userData.fullName || 'غير متوفر';
+            document.getElementById('userEmail').textContent = userData.email || 'غير متوفر';
+            document.getElementById('userPhone').textContent = userData.phone || 'غير متوفر';
+            document.getElementById('userCountry').textContent = getCountryName(userData.country) || 'غير متوفر';
+            
+            // عرض بيانات الموقع
+            if (locationData.latitude && locationData.longitude) {
+                document.getElementById('latitude').textContent = locationData.latitude.toFixed(6);
+                document.getElementById('longitude').textContent = locationData.longitude.toFixed(6);
+                document.getElementById('accuracy').textContent = `${Math.round(locationData.accuracy)} متر`;
+                document.getElementById('locationTime').textContent = new Date(locationData.timestamp).toLocaleString('ar-EG');
+                
+                // إنشاء الخريطة
+                const userLocation = { 
+                    lat: locationData.latitude, 
+                    lng: locationData.longitude 
+                };
+                
+                map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 15,
+                    center: userLocation,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    styles: [
+                        {
+                            "featureType": "all",
+                            "elementType": "geometry",
+                            "stylers": [{"color": "#242f3e"}]
+                        },
+                        {
+                            "featureType": "all",
+                            "elementType": "labels.text.stroke",
+                            "stylers": [{"lightness": -80}]
+                        },
+                        {
+                            "featureType": "administrative",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{"color": "#746855"}]
+                        },
+                        {
+                            "featureType": "landscape",
+                            "elementType": "all",
+                            "stylers": [{"color": "#2c3e50"}]
+                        },
+                        {
+                            "featureType": "poi",
+                            "elementType": "all",
+                            "stylers": [{"color": "#2c3e50"}]
+                        },
+                        {
+                            "featureType": "road",
+                            "elementType": "geometry",
+                            "stylers": [{"color": "#38414e"}]
+                        },
+                        {
+                            "featureType": "road",
+                            "elementType": "geometry.stroke",
+                            "stylers": [{"color": "#212a37"}]
+                        },
+                        {
+                            "featureType": "road",
+                            "elementType": "labels.text.fill",
+                            "stylers": [{"color": "#9ca5b3"}]
+                        },
+                        {
+                            "featureType": "road.highway",
+                            "elementType": "geometry",
+                            "stylers": [{"color": "#746855"}]
+                        },
+                        {
+                            "featureType": "road.highway",
+                            "elementType": "geometry.stroke",
+                            "stylers": [{"color": "#1f2835"}]
+                        },
+                        {
+                            "featureType": "water",
+                            "elementType": "all",
+                            "stylers": [{"color": "#1e2f40"}]
+                        }
+                    ]
+                });
+                
+                // إضافة علامة للموقع
+                marker = new google.maps.Marker({
+                    position: userLocation,
+                    map: map,
+                    title: 'موقعك الحالي',
+                    animation: google.maps.Animation.DROP,
+                    icon: {
+                        url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+                    }
+                });
+                
+                // إضافة دائرة توضح دقة الموقع
+                circle = new google.maps.Circle({
+                    center: userLocation,
+                    radius: locationData.accuracy,
+                    map: map,
+                    fillColor: '#4285F4',
+                    fillOpacity: 0.2,
+                    strokeColor: '#4285F4',
+                    strokeOpacity: 0.5,
+                    strokeWeight: 1
+                });
+                
+                // إضافة نافذة معلومات
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="color: black; padding: 10px;">
+                            <h3 style="margin-bottom: 10px;">موقعك الحالي</h3>
+                            <p><strong>الاسم:</strong> ${userData.fullName || 'غير متوفر'}</p>
+                            <p><strong>الدقة:</strong> ${Math.round(locationData.accuracy)} متر</p>
+                            <p><strong>الوقت:</strong> ${new Date(locationData.timestamp).toLocaleString('ar-EG')}</p>
+                        </div>
+                    `
+                });
+                
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+                
+                // فتح نافذة المعلومات تلقائياً
+                setTimeout(() => {
+                    infoWindow.open(map, marker);
+                }, 1500);
+            } else {
+                // في حالة عدم وجود بيانات موقع
+                document.getElementById('map').innerHTML = `
+                    <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; padding: 20px; text-align: center;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px; color: #ffd700;"></i>
+                        <h3>لا توجد بيانات موقع</h3>
+                        <p>يرجى العودة إلى صفحة التسجيل وتحديد موقعك للمشاركة في السحب.</p>
+                        <a href="index.html" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background: #ff8a00; color: white; text-decoration: none; border-radius: 5px;">العودة للتسجيل</a>
                     </div>
-                `
-            });
-
-            marker.addListener('click', () => {
-                infoWindow.open(map, marker);
-            });
+                `;
+            }
+        }
+        
+        // زر تحديث الموقع
+        document.getElementById('refreshLocation').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // تحديث بيانات الموقع
+                        const updatedLocation = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            accuracy: position.coords.accuracy,
+                            timestamp: new Date().toISOString()
+                        };
+                        
+                        // حفظ البيانات المحدثة
+                        localStorage.setItem('userLocation', JSON.stringify(updatedLocation));
+                        
+                        // إعادة تحميل الصفحة لتحديث الخريطة
+                        location.reload();
+                    },
+                    function(error) {
+                        alert("فشل في تحديث الموقع. يرجى المحاولة مرة أخرى.");
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } else {
+                alert("المتصفح لا يدعم خدمة تحديد الموقع.");
+            }
+        });
+        
+        // دالة للحصول على اسم الدولة
+        function getCountryName(countryCode) {
+            const countries = {
+                'SA': 'السعودية',
+                'AE': 'الإمارات',
+                'KW': 'الكويت',
+                'QA': 'قطر',
+                'BH': 'البحرين',
+                'OM': 'عمان',
+                'EG': 'مصر',
+                'JO': 'الأردن',
+                'LB': 'لبنان',
+                'other': 'دولة أخرى'
+            };
+            
+            return countries[countryCode] || countryCode;
         }
     </script>
 </body>

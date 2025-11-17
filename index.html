@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>موقعك على الخريطة - سحب iPhone 17</title>
+    <title>لوحة تحكم المسؤول - سحب iPhone 17</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -20,7 +20,7 @@
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -46,6 +46,42 @@
             opacity: 0.9;
         }
         
+        .admin-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .stats {
+            flex: 1;
+            min-width: 300px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-card i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
         .content {
             display: flex;
             flex-wrap: wrap;
@@ -62,77 +98,82 @@
             backdrop-filter: blur(10px);
         }
         
-        #map {
+        #adminMap {
             height: 500px;
             width: 100%;
         }
         
-        .info-panel {
+        .participants-container {
             flex: 1;
             min-width: 300px;
             background: rgba(255, 255, 255, 0.1);
-            padding: 25px;
             border-radius: 15px;
-            backdrop-filter: blur(10px);
+            overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .info-title {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            color: #ffd700;
-            text-align: center;
-        }
-        
-        .user-info {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-        }
-        
-        .info-item {
+            backdrop-filter: blur(10px);
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
+            flex-direction: column;
+        }
+        
+        .participants-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .info-label {
-            font-weight: 500;
-        }
-        
-        .info-value {
+        .participants-title {
+            font-size: 1.5rem;
             color: #ffd700;
-        }
-        
-        .coordinates {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-        }
-        
-        .coordinates h3 {
-            margin-bottom: 15px;
             text-align: center;
         }
         
-        .coordinate-item {
+        .participants-list {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 400px;
+            padding: 15px;
+        }
+        
+        .participant-item {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .participant-item:hover {
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateX(-5px);
+        }
+        
+        .participant-item.active {
+            background: rgba(255, 215, 0, 0.2);
+            border-left: 3px solid #ffd700;
+        }
+        
+        .participant-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .participant-details {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
         
         .actions {
             display: flex;
-            flex-direction: column;
             gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
         
         .btn {
-            padding: 15px;
+            padding: 12px 20px;
             border: none;
             border-radius: 8px;
             font-size: 1rem;
@@ -142,6 +183,8 @@
             text-align: center;
             text-decoration: none;
             color: white;
+            flex: 1;
+            min-width: 150px;
         }
         
         .btn-primary {
@@ -150,6 +193,10 @@
         
         .btn-secondary {
             background: linear-gradient(to right, #00b09b, #96c93d);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
         }
         
         .btn:hover {
@@ -161,14 +208,6 @@
             transform: translateY(0);
         }
         
-        .success-message {
-            text-align: center;
-            padding: 15px;
-            background: rgba(0, 200, 0, 0.2);
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        
         footer {
             text-align: center;
             padding: 20px;
@@ -177,13 +216,51 @@
             opacity: 0.7;
         }
         
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            color: #ffd700;
+            opacity: 0.7;
+        }
+        
+        .participant-location {
+            margin-top: 5px;
+            font-size: 0.8rem;
+        }
+        
+        .location-available {
+            color: #4CAF50;
+        }
+        
+        .location-missing {
+            color: #f44336;
+        }
+        
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.8rem;
             }
             
-            #map {
+            #adminMap {
                 height: 400px;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .content {
+                flex-direction: column;
+            }
+            
+            .btn {
+                min-width: 100%;
             }
         }
     </style>
@@ -191,261 +268,309 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-map-marked-alt"></i> موقعك على الخريطة</h1>
-            <p class="subtitle">تم تحديد موقعك بنجاح! يمكنك رؤية موقعك على الخريطة أدناه</p>
+            <h1><i class="fas fa-user-shield"></i> لوحة تحكم المسؤول</h1>
+            <p class="subtitle">عرض جميع المسجلين في السحب ومواقعهم على الخريطة</p>
         </header>
         
-        <div class="content">
-            <div class="map-container">
-                <div id="map"></div>
-            </div>
-            
-            <div class="info-panel">
-                <h2 class="info-title">معلومات المشاركة</h2>
-                
-                <div class="user-info">
-                    <h3><i class="fas fa-user-circle"></i> بيانات المسجل</h3>
-                    <div class="info-item">
-                        <span class="info-label">الاسم:</span>
-                        <span class="info-value" id="userName">-</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">البريد الإلكتروني:</span>
-                        <span class="info-value" id="userEmail">-</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">رقم الهاتف:</span>
-                        <span class="info-value" id="userPhone">-</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">الدولة:</span>
-                        <span class="info-value" id="userCountry">-</span>
-                    </div>
+        <div class="admin-panel">
+            <div class="stats">
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-number" id="totalParticipants">0</div>
+                    <div>إجمالي المسجلين</div>
                 </div>
-                
-                <div class="coordinates">
-                    <h3><i class="fas fa-location-arrow"></i> الإحداثيات</h3>
-                    <div class="coordinate-item">
-                        <span>خط العرض:</span>
-                        <span id="latitude">-</span>
-                    </div>
-                    <div class="coordinate-item">
-                        <span>خط الطول:</span>
-                        <span id="longitude">-</span>
-                    </div>
-                    <div class="coordinate-item">
-                        <span>الدقة:</span>
-                        <span id="accuracy">-</span>
-                    </div>
-                    <div class="coordinate-item">
-                        <span>الوقت:</span>
-                        <span id="locationTime">-</span>
-                    </div>
+                <div class="stat-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div class="stat-number" id="locationsCount">0</div>
+                    <div>مواقع محددة</div>
                 </div>
-                
-                <div class="actions">
-                    <a href="index.html" class="btn btn-primary">
-                        <i class="fas fa-arrow-right"></i> العودة إلى صفحة السحب
-                    </a>
-                    <button class="btn btn-secondary" id="refreshLocation">
-                        <i class="fas fa-sync-alt"></i> تحديث الموقع
-                    </button>
+                <div class="stat-card">
+                    <i class="fas fa-globe"></i>
+                    <div class="stat-number" id="countriesCount">0</div>
+                    <div>دول مختلفة</div>
                 </div>
-                
-                <div class="success-message">
-                    <p><i class="fas fa-check-circle"></i> تم تسجيل مشاركتك في السحب بنجاح!</p>
+                <div class="stat-card">
+                    <i class="fas fa-calendar-day"></i>
+                    <div class="stat-number" id="todayCount">0</div>
+                    <div>مسجلين اليوم</div>
                 </div>
             </div>
         </div>
         
+        <div class="content">
+            <div class="map-container">
+                <div id="adminMap"></div>
+            </div>
+            
+            <div class="participants-container">
+                <div class="participants-header">
+                    <h2 class="participants-title">قائمة المسجلين</h2>
+                </div>
+                <div class="participants-list" id="participantsList">
+                    <!-- سيتم ملء هذا القسم بالمسجلين عبر JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button class="btn btn-primary" id="refreshBtn">
+                <i class="fas fa-sync-alt"></i> تحديث البيانات
+            </button>
+            <button class="btn btn-secondary" id="exportBtn">
+                <i class="fas fa-download"></i> تصدير البيانات
+            </button>
+            <button class="btn btn-danger" id="clearBtn">
+                <i class="fas fa-trash-alt"></i> مسح الكل
+            </button>
+            <a href="index.html" class="btn btn-primary">
+                <i class="fas fa-arrow-right"></i> العودة للسحب
+            </a>
+        </div>
+        
         <footer>
-            <p>سيتم الإعلان عن الفائز في 5 يناير 2025 | شكراً لمشاركتك!</p>
+            <p>لوحة تحكم المسؤول - نظام السحب على iPhone 17 | جميع الحقوق محفوظة © 2024</p>
         </footer>
     </div>
 
     <!-- خرائط جوجل API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5cT2Gk5NRR2pZ1Ws6Q9Z-_J8L1CkQd0g&callback=initMap&libraries=geometry" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5cT2Gk5NRR2pZ1Ws6Q9Z-_J8L1CkQd0g&callback=initAdminMap&libraries=geometry" async defer></script>
     
     <script>
-        let map;
-        let marker;
-        let circle;
+        let adminMap;
+        let markers = [];
         
-        function initMap() {
-            // جلب بيانات المستخدم من localStorage
-            const userData = JSON.parse(localStorage.getItem('giveawayRegistration') || '{}');
-            const locationData = JSON.parse(localStorage.getItem('userLocation') || '{}');
-            
-            // عرض بيانات المستخدم
-            document.getElementById('userName').textContent = userData.fullName || 'غير متوفر';
-            document.getElementById('userEmail').textContent = userData.email || 'غير متوفر';
-            document.getElementById('userPhone').textContent = userData.phone || 'غير متوفر';
-            document.getElementById('userCountry').textContent = getCountryName(userData.country) || 'غير متوفر';
-            
-            // عرض بيانات الموقع
-            if (locationData.latitude && locationData.longitude) {
-                document.getElementById('latitude').textContent = locationData.latitude.toFixed(6);
-                document.getElementById('longitude').textContent = locationData.longitude.toFixed(6);
-                document.getElementById('accuracy').textContent = `${Math.round(locationData.accuracy)} متر`;
-                document.getElementById('locationTime').textContent = new Date(locationData.timestamp).toLocaleString('ar-EG');
-                
-                // إنشاء الخريطة
-                const userLocation = { 
-                    lat: locationData.latitude, 
-                    lng: locationData.longitude 
-                };
-                
-                map = new google.maps.Map(document.getElementById('map'), {
-                    zoom: 15,
-                    center: userLocation,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP,
-                    styles: [
-                        {
-                            "featureType": "all",
-                            "elementType": "geometry",
-                            "stylers": [{"color": "#242f3e"}]
-                        },
-                        {
-                            "featureType": "all",
-                            "elementType": "labels.text.stroke",
-                            "stylers": [{"lightness": -80}]
-                        },
-                        {
-                            "featureType": "administrative",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{"color": "#746855"}]
-                        },
-                        {
-                            "featureType": "landscape",
-                            "elementType": "all",
-                            "stylers": [{"color": "#2c3e50"}]
-                        },
-                        {
-                            "featureType": "poi",
-                            "elementType": "all",
-                            "stylers": [{"color": "#2c3e50"}]
-                        },
-                        {
-                            "featureType": "road",
-                            "elementType": "geometry",
-                            "stylers": [{"color": "#38414e"}]
-                        },
-                        {
-                            "featureType": "road",
-                            "elementType": "geometry.stroke",
-                            "stylers": [{"color": "#212a37"}]
-                        },
-                        {
-                            "featureType": "road",
-                            "elementType": "labels.text.fill",
-                            "stylers": [{"color": "#9ca5b3"}]
-                        },
-                        {
-                            "featureType": "road.highway",
-                            "elementType": "geometry",
-                            "stylers": [{"color": "#746855"}]
-                        },
-                        {
-                            "featureType": "road.highway",
-                            "elementType": "geometry.stroke",
-                            "stylers": [{"color": "#1f2835"}]
-                        },
-                        {
-                            "featureType": "water",
-                            "elementType": "all",
-                            "stylers": [{"color": "#1e2f40"}]
-                        }
-                    ]
-                });
-                
-                // إضافة علامة للموقع
-                marker = new google.maps.Marker({
-                    position: userLocation,
-                    map: map,
-                    title: 'موقعك الحالي',
-                    animation: google.maps.Animation.DROP,
-                    icon: {
-                        url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+        function initAdminMap() {
+            // إنشاء الخريطة
+            adminMap = new google.maps.Map(document.getElementById('adminMap'), {
+                zoom: 2,
+                center: { lat: 20, lng: 0 },
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                styles: [
+                    {
+                        "featureType": "all",
+                        "elementType": "geometry",
+                        "stylers": [{"color": "#242f3e"}]
+                    },
+                    {
+                        "featureType": "all",
+                        "elementType": "labels.text.stroke",
+                        "stylers": [{"lightness": -80}]
+                    },
+                    {
+                        "featureType": "administrative",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{"color": "#746855"}]
+                    },
+                    {
+                        "featureType": "landscape",
+                        "elementType": "all",
+                        "stylers": [{"color": "#2c3e50"}]
+                    },
+                    {
+                        "featureType": "poi",
+                        "elementType": "all",
+                        "stylers": [{"color": "#2c3e50"}]
+                    },
+                    {
+                        "featureType": "road",
+                        "elementType": "geometry",
+                        "stylers": [{"color": "#38414e"}]
+                    },
+                    {
+                        "featureType": "road",
+                        "elementType": "geometry.stroke",
+                        "stylers": [{"color": "#212a37"}]
+                    },
+                    {
+                        "featureType": "road",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{"color": "#9ca5b3"}]
+                    },
+                    {
+                        "featureType": "road.highway",
+                        "elementType": "geometry",
+                        "stylers": [{"color": "#746855"}]
+                    },
+                    {
+                        "featureType": "road.highway",
+                        "elementType": "geometry.stroke",
+                        "stylers": [{"color": "#1f2835"}]
+                    },
+                    {
+                        "featureType": "water",
+                        "elementType": "all",
+                        "stylers": [{"color": "#1e2f40"}]
                     }
-                });
-                
-                // إضافة دائرة توضح دقة الموقع
-                circle = new google.maps.Circle({
-                    center: userLocation,
-                    radius: locationData.accuracy,
-                    map: map,
-                    fillColor: '#4285F4',
-                    fillOpacity: 0.2,
-                    strokeColor: '#4285F4',
-                    strokeOpacity: 0.5,
-                    strokeWeight: 1
-                });
-                
-                // إضافة نافذة معلومات
-                const infoWindow = new google.maps.InfoWindow({
-                    content: `
-                        <div style="color: black; padding: 10px;">
-                            <h3 style="margin-bottom: 10px;">موقعك الحالي</h3>
-                            <p><strong>الاسم:</strong> ${userData.fullName || 'غير متوفر'}</p>
-                            <p><strong>الدقة:</strong> ${Math.round(locationData.accuracy)} متر</p>
-                            <p><strong>الوقت:</strong> ${new Date(locationData.timestamp).toLocaleString('ar-EG')}</p>
-                        </div>
-                    `
-                });
-                
-                marker.addListener('click', () => {
-                    infoWindow.open(map, marker);
-                });
-                
-                // فتح نافذة المعلومات تلقائياً
-                setTimeout(() => {
-                    infoWindow.open(map, marker);
-                }, 1500);
-            } else {
-                // في حالة عدم وجود بيانات موقع
-                document.getElementById('map').innerHTML = `
-                    <div style="display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; padding: 20px; text-align: center;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 20px; color: #ffd700;"></i>
-                        <h3>لا توجد بيانات موقع</h3>
-                        <p>يرجى العودة إلى صفحة التسجيل وتحديد موقعك للمشاركة في السحب.</p>
-                        <a href="index.html" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background: #ff8a00; color: white; text-decoration: none; border-radius: 5px;">العودة للتسجيل</a>
+                ]
+            });
+            
+            // تحميل وعرض البيانات
+            loadParticipantsData();
+        }
+        
+        function loadParticipantsData() {
+            // جلب قائمة المسجلين من localStorage
+            const participants = JSON.parse(localStorage.getItem('giveawayParticipants')) || [];
+            
+            // تحديث الإحصائيات
+            updateStatistics(participants);
+            
+            // عرض قائمة المسجلين
+            displayParticipantsList(participants);
+            
+            // إضافة العلامات على الخريطة
+            addMarkersToMap(participants);
+        }
+        
+        function updateStatistics(participants) {
+            const totalParticipants = participants.length;
+            const locationsCount = participants.filter(p => p.location).length;
+            
+            // حساب عدد الدول المختلفة
+            const countries = [...new Set(participants.map(p => p.country))];
+            const countriesCount = countries.length;
+            
+            // حساب المسجلين اليوم
+            const today = new Date().toDateString();
+            const todayCount = participants.filter(p => {
+                const participantDate = new Date(p.timestamp).toDateString();
+                return participantDate === today;
+            }).length;
+            
+            // تحديث الإحصائيات في الواجهة
+            document.getElementById('totalParticipants').textContent = totalParticipants;
+            document.getElementById('locationsCount').textContent = locationsCount;
+            document.getElementById('countriesCount').textContent = countriesCount;
+            document.getElementById('todayCount').textContent = todayCount;
+        }
+        
+        function displayParticipantsList(participants) {
+            const container = document.getElementById('participantsList');
+            
+            if (participants.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-users-slash"></i>
+                        <h3>لا يوجد مسجلين حتى الآن</h3>
+                        <p>لم يسجل أي مستخدم في السحب بعد.</p>
                     </div>
                 `;
+                return;
+            }
+            
+            // ترتيب المسجلين من الأحدث إلى الأقدم
+            participants.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            let html = '';
+            participants.forEach((participant, index) => {
+                const hasLocation = participant.location && participant.location.latitude;
+                const registrationTime = new Date(participant.timestamp).toLocaleString('ar-EG');
+                
+                html += `
+                    <div class="participant-item" data-index="${index}">
+                        <div class="participant-name">${participant.fullName}</div>
+                        <div class="participant-details">
+                            <span>${getCountryName(participant.country)}</span>
+                            <span>${participant.phone}</span>
+                        </div>
+                        <div class="participant-details">
+                            <span>${registrationTime}</span>
+                        </div>
+                        <div class="participant-location ${hasLocation ? 'location-available' : 'location-missing'}">
+                            ${hasLocation ? '<i class="fas fa-check-circle"></i> موقع محدد' : '<i class="fas fa-times-circle"></i> موقع غير محدد'}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            
+            // إضافة مستمعي الأحداث لعناصر المسجلين
+            document.querySelectorAll('.participant-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    // إزالة النشاط من جميع العناصر
+                    document.querySelectorAll('.participant-item').forEach(i => {
+                        i.classList.remove('active');
+                    });
+                    
+                    // إضافة النشاط للعنصر المحدد
+                    this.classList.add('active');
+                    
+                    // التركيز على الخريطة للمستخدم المحدد
+                    const index = parseInt(this.getAttribute('data-index'));
+                    const participants = JSON.parse(localStorage.getItem('giveawayParticipants')) || [];
+                    focusOnParticipant(participants[index]);
+                });
+            });
+        }
+        
+        function addMarkersToMap(participants) {
+            // مسح العلامات القديمة
+            markers.forEach(marker => marker.setMap(null));
+            markers = [];
+            
+            // إضافة علامات جديدة
+            participants.forEach(participant => {
+                if (participant.location && participant.location.latitude) {
+                    const position = {
+                        lat: participant.location.latitude,
+                        lng: participant.location.longitude
+                    };
+                    
+                    const marker = new google.maps.Marker({
+                        position: position,
+                        map: adminMap,
+                        title: participant.fullName,
+                        icon: {
+                            url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                        }
+                    });
+                    
+                    // إضافة نافذة معلومات
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <div style="color: black; padding: 10px; max-width: 250px;">
+                                <h3 style="margin-bottom: 10px;">${participant.fullName}</h3>
+                                <p><strong>الهاتف:</strong> ${participant.phone}</p>
+                                <p><strong>الدولة:</strong> ${getCountryName(participant.country)}</p>
+                                <p><strong>وقت التسجيل:</strong> ${new Date(participant.timestamp).toLocaleString('ar-EG')}</p>
+                                <p><strong>الدقة:</strong> ${Math.round(participant.location.accuracy)} متر</p>
+                            </div>
+                        `
+                    });
+                    
+                    marker.addListener('click', () => {
+                        infoWindow.open(adminMap, marker);
+                    });
+                    
+                    markers.push(marker);
+                }
+            });
+            
+            // ضبط عرض الخريطة ليشمل جميع العلامات
+            if (markers.length > 0) {
+                const bounds = new google.maps.LatLngBounds();
+                markers.forEach(marker => bounds.extend(marker.getPosition()));
+                adminMap.fitBounds(bounds);
+                
+                // إذا كانت هناك علامة واحدة فقط، قم بتكبير الخريطة أكثر
+                if (markers.length === 1) {
+                    adminMap.setZoom(15);
+                }
             }
         }
         
-        // زر تحديث الموقع
-        document.getElementById('refreshLocation').addEventListener('click', function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        // تحديث بيانات الموقع
-                        const updatedLocation = {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            accuracy: position.coords.accuracy,
-                            timestamp: new Date().toISOString()
-                        };
-                        
-                        // حفظ البيانات المحدثة
-                        localStorage.setItem('userLocation', JSON.stringify(updatedLocation));
-                        
-                        // إعادة تحميل الصفحة لتحديث الخريطة
-                        location.reload();
-                    },
-                    function(error) {
-                        alert("فشل في تحديث الموقع. يرجى المحاولة مرة أخرى.");
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
-            } else {
-                alert("المتصفح لا يدعم خدمة تحديد الموقع.");
+        function focusOnParticipant(participant) {
+            if (participant.location && participant.location.latitude) {
+                const position = {
+                    lat: participant.location.latitude,
+                    lng: participant.location.longitude
+                };
+                
+                adminMap.setZoom(15);
+                adminMap.setCenter(position);
             }
-        });
+        }
         
         // دالة للحصول على اسم الدولة
         function getCountryName(countryCode) {
@@ -464,6 +589,85 @@
             
             return countries[countryCode] || countryCode;
         }
+        
+        // أحداث الأزرار
+        document.getElementById('refreshBtn').addEventListener('click', function() {
+            loadParticipantsData();
+            showNotification('تم تحديث البيانات بنجاح');
+        });
+        
+        document.getElementById('exportBtn').addEventListener('click', function() {
+            const participants = JSON.parse(localStorage.getItem('giveawayParticipants')) || [];
+            
+            if (participants.length === 0) {
+                alert('لا توجد بيانات لتصديرها');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(participants, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'participants-data.json';
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            showNotification('تم تصدير البيانات بنجاح');
+        });
+        
+        document.getElementById('clearBtn').addEventListener('click', function() {
+            if (confirm('هل أنت متأكد من رغبتك في مسح جميع بيانات المسجلين؟ لا يمكن التراجع عن هذا الإجراء.')) {
+                localStorage.removeItem('giveawayParticipants');
+                loadParticipantsData();
+                showNotification('تم مسح جميع البيانات بنجاح');
+            }
+        });
+        
+        // دالة لعرض الإشعارات
+        function showNotification(message) {
+            // إنشاء عنصر الإشعار
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(0, 200, 0, 0.9);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 5px;
+                z-index: 10000;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            // إضافة الإشعار إلى الصفحة
+            document.body.appendChild(notification);
+            
+            // إزالة الإشعار بعد 3 ثوان
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // إضافة أنيميشن للإشعارات
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

@@ -242,6 +242,14 @@
             color: #f44336;
         }
         
+        .debug-info {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+        
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.8rem;
@@ -312,6 +320,10 @@
             </div>
         </div>
         
+        <div class="debug-info" id="debugInfo">
+            <strong>معلومات التصحيح:</strong> جاري تحميل البيانات...
+        </div>
+        
         <div class="actions">
             <button class="btn btn-primary" id="refreshBtn">
                 <i class="fas fa-sync-alt"></i> تحديث البيانات
@@ -340,6 +352,8 @@
         let markers = [];
         
         function initAdminMap() {
+            console.log('جاري تهيئة الخريطة...');
+            
             // إنشاء الخريطة
             adminMap = new google.maps.Map(document.getElementById('adminMap'), {
                 zoom: 2,
@@ -409,8 +423,20 @@
         }
         
         function loadParticipantsData() {
+            console.log('جاري تحميل بيانات المسجلين...');
+            
             // جلب قائمة المسجلين من localStorage
-            const participants = JSON.parse(localStorage.getItem('giveawayParticipants')) || [];
+            let participants = [];
+            try {
+                participants = JSON.parse(localStorage.getItem('giveawayParticipants')) || [];
+                console.log('تم تحميل المشاركين:', participants);
+            } catch (error) {
+                console.error('خطأ في تحميل البيانات:', error);
+                participants = [];
+            }
+            
+            // تحديث معلومات التصحيح
+            updateDebugInfo(participants);
             
             // تحديث الإحصائيات
             updateStatistics(participants);
@@ -420,6 +446,29 @@
             
             // إضافة العلامات على الخريطة
             addMarkersToMap(participants);
+        }
+        
+        function updateDebugInfo(participants) {
+            const debugInfo = document.getElementById('debugInfo');
+            const hasParticipants = participants.length > 0;
+            
+            let debugHTML = `<strong>معلومات التصحيح:</strong> `;
+            
+            if (hasParticipants) {
+                debugHTML += `
+                    تم تحميل ${participants.length} مسجل<br>
+                    المفاتيح في localStorage: ${Object.keys(localStorage).join(', ')}<br>
+                    آخر تحديث: ${new Date().toLocaleString('ar-EG')}
+                `;
+            } else {
+                debugHTML += `
+                    لا توجد بيانات مسجلين<br>
+                    المفاتيح في localStorage: ${Object.keys(localStorage).join(', ')}<br>
+                    تأكد من أنك قمت بالتسجيل من صفحة الزائر أولاً
+                `;
+            }
+            
+            debugInfo.innerHTML = debugHTML;
         }
         
         function updateStatistics(participants) {
@@ -442,6 +491,8 @@
             document.getElementById('locationsCount').textContent = locationsCount;
             document.getElementById('countriesCount').textContent = countriesCount;
             document.getElementById('todayCount').textContent = todayCount;
+            
+            console.log('الإحصائيات المحدثة:', { totalParticipants, locationsCount, countriesCount, todayCount });
         }
         
         function displayParticipantsList(participants) {
@@ -453,6 +504,7 @@
                         <i class="fas fa-users-slash"></i>
                         <h3>لا يوجد مسجلين حتى الآن</h3>
                         <p>لم يسجل أي مستخدم في السحب بعد.</p>
+                        <p>انتقل إلى <a href="index.html" style="color: #ffd700;">صفحة التسجيل</a> لتسجيل مستخدم جديد.</p>
                     </div>
                 `;
                 return;
@@ -477,7 +529,10 @@
                             <span>${registrationTime}</span>
                         </div>
                         <div class="participant-location ${hasLocation ? 'location-available' : 'location-missing'}">
-                            ${hasLocation ? '<i class="fas fa-check-circle"></i> موقع محدد' : '<i class="fas fa-times-circle"></i> موقع غير محدد'}
+                            ${hasLocation ? 
+                                `<i class="fas fa-check-circle"></i> موقع محدد (${participant.location.latitude.toFixed(4)}, ${participant.location.longitude.toFixed(4)})` : 
+                                '<i class="fas fa-times-circle"></i> موقع غير محدد'
+                            }
                         </div>
                     </div>
                 `;
@@ -505,13 +560,17 @@
         }
         
         function addMarkersToMap(participants) {
+            console.log('جاري إضافة العلامات للخريطة...');
+            
             // مسح العلامات القديمة
             markers.forEach(marker => marker.setMap(null));
             markers = [];
             
+            let hasValidLocations = false;
+            
             // إضافة علامات جديدة
             participants.forEach(participant => {
-                if (participant.location && participant.location.latitude) {
+                if (participant.location && participant.location.latitude && participant.location.longitude) {
                     const position = {
                         lat: participant.location.latitude,
                         lng: participant.location.longitude
@@ -535,6 +594,7 @@
                                 <p><strong>الدولة:</strong> ${getCountryName(participant.country)}</p>
                                 <p><strong>وقت التسجيل:</strong> ${new Date(participant.timestamp).toLocaleString('ar-EG')}</p>
                                 <p><strong>الدقة:</strong> ${Math.round(participant.location.accuracy)} متر</p>
+                                <p><strong>الإحداثيات:</strong> ${participant.location.latitude.toFixed(6)}, ${participant.location.longitude.toFixed(6)}</p>
                             </div>
                         `
                     });
@@ -544,19 +604,28 @@
                     });
                     
                     markers.push(marker);
+                    hasValidLocations = true;
+                    
+                    console.log('تم إضافة علامة للمستخدم:', participant.fullName, position);
                 }
             });
             
             // ضبط عرض الخريطة ليشمل جميع العلامات
-            if (markers.length > 0) {
+            if (hasValidLocations && markers.length > 0) {
                 const bounds = new google.maps.LatLngBounds();
                 markers.forEach(marker => bounds.extend(marker.getPosition()));
                 adminMap.fitBounds(bounds);
                 
                 // إذا كانت هناك علامة واحدة فقط، قم بتكبير الخريطة أكثر
                 if (markers.length === 1) {
-                    adminMap.setZoom(15);
+                    setTimeout(() => {
+                        adminMap.setZoom(15);
+                    }, 1000);
                 }
+                
+                console.log('تم ضبط حدود الخريطة لتعكس العلامات');
+            } else {
+                console.log('لا توجد مواقع صالحة لعرضها على الخريطة');
             }
         }
         
@@ -569,6 +638,7 @@
                 
                 adminMap.setZoom(15);
                 adminMap.setCenter(position);
+                console.log('تم التركيز على المستخدم:', participant.fullName, position);
             }
         }
         
@@ -592,6 +662,7 @@
         
         // أحداث الأزرار
         document.getElementById('refreshBtn').addEventListener('click', function() {
+            console.log('تم النقر على زر التحديث');
             loadParticipantsData();
             showNotification('تم تحديث البيانات بنجاح');
         });
@@ -650,7 +721,9 @@
             setTimeout(() => {
                 notification.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => {
-                    document.body.removeChild(notification);
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
                 }, 300);
             }, 3000);
         }
@@ -668,6 +741,16 @@
             }
         `;
         document.head.appendChild(style);
+        
+        // تحديث البيانات كل 5 ثوانٍ للتأكد من عرض البيانات الجديدة
+        setInterval(() => {
+            const participants = JSON.parse(localStorage.getItem('giveawayParticipants')) || [];
+            const currentCount = parseInt(document.getElementById('totalParticipants').textContent);
+            if (participants.length !== currentCount) {
+                console.log('تم اكتشاف تغيير في عدد المسجلين، جاري التحديث...');
+                loadParticipantsData();
+            }
+        }, 5000);
     </script>
 </body>
 </html>
